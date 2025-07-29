@@ -16,8 +16,13 @@ async function bootstrap() {
     }),
   );
 
-  // Enable CORS
-  app.enableCors();
+  // Enable CORS - Allow all origins
+  app.enableCors({
+    origin: true, // Allow all origins
+    credentials: true, // Allow credentials
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  });
 
   // Serve static files for uploads
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
