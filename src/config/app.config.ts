@@ -5,4 +5,9 @@ export const getAppConfig = (configService: ConfigService) => ({
   nodeEnv: configService.get<string>('NODE_ENV', 'development'),
   jwtSecret: configService.get<string>('JWT_SECRET'),
   jwtExpiresIn: configService.get<string>('JWT_EXPIRES_IN', '1d'),
+  supabase: {
+    url: configService.get<string>('SUPABASE_URL'),
+    anonKey: configService.get<string>('SUPABASE_ANON_KEY'),
+    serviceRoleKey: configService.get<string>('SUPABASE_SERVICE_ROLE_KEY'),
+  },
 });

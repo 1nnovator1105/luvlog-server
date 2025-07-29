@@ -1,70 +1,44 @@
 import { Injectable } from '@nestjs/common';
-import * as sharp from 'sharp';
-import * as path from 'path';
-import * as fs from 'fs/promises';
-import { Express } from 'express';
+import { ConfigService } from '@nestjs/config';
+import { createSupabaseClient } from '../../config/supabase.config';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class UploadService {
-  private readonly uploadDir = process.env.VERCEL
-    ? path.join('/tmp', 'uploads')
-    : path.join(process.cwd(), 'uploads');
+  private supabase: SupabaseClient;
 
-  constructor() {
-    void this.ensureUploadDir();
-  }
-
-  private async ensureUploadDir() {
-    try {
-      await fs.access(this.uploadDir);
-    } catch {
-      try {
-        await fs.mkdir(this.uploadDir, { recursive: true });
-      } catch (error) {
-        console.warn('Could not create upload directory:', error);
-        // In Vercel, we might not have write permissions
-        // Continue without failing the entire app
-      }
-    }
+  constructor(configService: ConfigService) {
+    this.supabase = createSupabaseClient(configService);
   }
 
   async processAndSaveImage(file: Express.Multer.File): Promise<string> {
-    const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.png`;
-
-    // In Vercel/serverless environment, we should use external storage
-    if (process.env.VERCEL) {
-      console.warn(
-        'File uploads are not persistent in Vercel. Please use external storage like S3.',
-      );
-      // For now, just return a data URL
-      const resizedBuffer = await sharp(file.buffer)
-        .resize(800, 600, {
-          fit: 'inside',
-          withoutEnlargement: true,
-        })
-        .png()
-        .toBuffer();
-
-      return `data:image/png;base64,${resizedBuffer.toString('base64')}`;
-    }
-
-    // Local development
-    const filepath = path.join(this.uploadDir, filename);
+    const fileExtension = file.originalname.split('.').pop() || 'jpg';
+    const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExtension}`;
 
     try {
-      await sharp(file.buffer)
-        .resize(800, 600, {
-          fit: 'inside',
-          withoutEnlargement: true,
-        })
-        .png()
-        .toFile(filepath);
+      // Supabase Storage에 업로드
+      const { error } = await this.supabase.storage
+        .from('luvlog')
+        .upload(`images/${filename}`, file.buffer, {
+          contentType: file.mimetype,
+          cacheControl: '3600',
+          upsert: false,
+        });
 
-      const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-      return `${baseUrl}/uploads/${filename}`;
+      if (error) {
+        console.error('Supabase upload error:', error);
+        throw new Error('Failed to upload image to Supabase');
+      }
+
+      // 공개 URL 반환
+      const { data: publicUrlData } = this.supabase.storage
+        .from('luvlog')
+        .getPublicUrl(`images/${filename}`);
+
+      return publicUrlData.publicUrl;
     } catch (error) {
-      console.error('Failed to save image:', error);
-      throw new Error('Failed to process image');
+      console.error('Failed to upload image:', error);
+      throw new Error('Failed to upload image');
     }
   }
 }
