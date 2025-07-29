@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Code } from './entities/code.entity';
+import { UserWithRoleDto } from './dto/user-with-role.dto';
 
 @Injectable()
 export class UsersService {
@@ -19,7 +20,7 @@ export class UsersService {
     });
   }
 
-  async findOneWithRole(userId: string): Promise<any> {
+  async findOneWithRole(userId: string): Promise<UserWithRoleDto | null> {
     const user = await this.userRepository.findOne({
       where: { userId },
     });

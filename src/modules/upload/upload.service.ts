@@ -9,7 +9,7 @@ export class UploadService {
   private readonly uploadDir = path.join(process.cwd(), 'uploads');
 
   constructor() {
-    this.ensureUploadDir();
+    void this.ensureUploadDir();
   }
 
   private async ensureUploadDir() {

@@ -10,7 +10,10 @@ import {
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
-import { GetPostsQueryDto, GetPostsStatusQueryDto } from './dto/get-posts-query.dto';
+import {
+  GetPostsQueryDto,
+  GetPostsStatusQueryDto,
+} from './dto/get-posts-query.dto';
 
 @Controller()
 export class PostsController {

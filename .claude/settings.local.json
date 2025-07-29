@@ -5,7 +5,10 @@
       "Bash(ls:*)",
       "Bash(npm run start:dev:*)",
       "Bash(npm install:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(npm run build:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npm run lint)"
     ],
     "deny": []
   }

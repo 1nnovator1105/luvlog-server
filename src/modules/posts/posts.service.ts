@@ -33,7 +33,6 @@ export class PostsService {
     userRole: string,
   ): Promise<PostResponseDto[]> {
     const pageNum = parseInt(query.page || '0', 10);
-    const limit = parseInt(query.readLimit || '5', 10);
 
     // Build query based on user role
     const queryBuilder = this.postRepository.createQueryBuilder('post');
@@ -50,15 +49,15 @@ export class PostsService {
     // Get all posts for page group calculation
     const allPosts = await queryBuilder
       .orderBy('post.createDate', 'DESC')
-      .getRawMany();
+      .getMany();
 
     // Calculate page groups and filter
     const postsWithPageGroup = allPosts.map((post, index) => ({
-      CONTENTS_ID: post.post_id,
-      CONTENTS_TITLE: post.post_title,
-      CONTENTS_AUTHOR: post.post_author,
-      CONTENTS: post.post_contents,
-      CREATE_DATE: this.formatDate(post.post_createDate),
+      CONTENTS_ID: post.id,
+      CONTENTS_TITLE: post.title,
+      CONTENTS_AUTHOR: post.author,
+      CONTENTS: post.contents,
+      CREATE_DATE: this.formatDate(post.createDate),
       PAGE_GROUP: Math.ceil((index + 1) / 5),
     }));
 
@@ -117,6 +116,10 @@ export class PostsService {
   }
 
   private formatDate(date: Date): string {
+    if (!date) {
+      return '';
+    }
+
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -130,8 +133,8 @@ export class PostsService {
   private truncateContent(content: string): string {
     // Remove HTML tags and truncate
     const textContent = content.replace(/<[^>]*>/g, '');
-    return textContent.length > 100 
-      ? textContent.substring(0, 100) + '...' 
+    return textContent.length > 100
+      ? textContent.substring(0, 100) + '...'
       : textContent;
   }
 }
