@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "dist/main.js",
+      "src": "api/index.ts",
       "use": "@vercel/node",
       "config": {
         "includeFiles": ["node_modules/sharp/**/*"]
@@ -12,7 +12,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "dist/main.js",
+      "dest": "api/index.ts",
       "headers": {
         "Access-Control-Allow-Origin": "https://www.luvlog.xyz",
         "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
@@ -21,7 +21,7 @@
     },
     {
       "src": "/api/(.*)",
-      "dest": "dist/main.js",
+      "dest": "api/index.ts",
       "headers": {
         "Access-Control-Allow-Origin": "https://luvlog.xyz",
         "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
@@ -30,7 +30,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "dist/main.js"
+      "dest": "api/index.ts"
     }
   ]
 }
