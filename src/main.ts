@@ -7,6 +7,8 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  const allowedOrigins = ['https://luvlog.xyz', 'https://www.luvlog.xyz'];
+
   // Enable validation globally
   app.useGlobalPipes(
     new ValidationPipe({
@@ -18,7 +20,14 @@ async function bootstrap() {
 
   // Enable CORS - Allow all origins
   app.enableCors({
-    origin: 'https://luvlog.xyz', // Allow all origins
+    origin: (origin, callback) => {
+      // origin이 undefined일 수 있음 (예: Postman, same-origin 요청)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true, // Allow credentials
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
